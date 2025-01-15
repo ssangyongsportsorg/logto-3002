@@ -1,4 +1,4 @@
-FROM svhd/logto:latest
+FROM ghcr.io/logto-io/logto:edge
 
 EXPOSE 3001
 

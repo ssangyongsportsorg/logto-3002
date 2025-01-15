@@ -1,6 +1,6 @@
 FROM ghcr.io/logto-io/logto:edge
 
-EXPOSE 3001
+EXPOSE 3002
 
 # Create directory for CA certificate
 RUN mkdir -p /etc/ssl/certs/aiven
@@ -10,7 +10,7 @@ RUN mkdir -p /etc/ssl/certs/aiven
 COPY ca.pem /etc/ssl/certs/aiven/
 
 ENV TRUST_PROXY_HEADER=1
-ENV PORT=3001
+ENV PORT=3002
 # 設定 SSL 憑證路徑
 ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/aiven/ca.pem
 

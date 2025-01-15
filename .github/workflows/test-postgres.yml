@@ -1,43 +1,40 @@
-name: Test PostgreSQL Connection
+name: PostgreSQL Connection Test
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  test-postgres:
+  test-psql:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Test PostgreSQL Connection
-      env:
-        DB_URL: ${{ secrets.DB_URL }}
-      run: |
-        node -e "
-        const { Client } = require('pg');
-        const client = new Client({
-          connectionString: process.env.DB_URL
-        });
-        client.connect()
-          .then(() => {
-            console.log('✅ PostgreSQL Connection Successful');
-            client.end();
-          })
-          .catch((err) => {
-            console.error('❌ PostgreSQL Connection Failed:', err.message);
-            process.exit(1);
-          });
-        "
+      - name: Test PostgreSQL Connection
+        run: |
+          psql "$DATABASE_URL" -c "\l"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
